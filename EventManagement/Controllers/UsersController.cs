@@ -47,6 +47,57 @@ namespace EventManagement.Controllers
 
             return View(user);
         }
+        public async Task<IActionResult> OrganizerDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var events = await _context.Events.Where(e => e.OrganizerId == id).ToListAsync();
+            var eventIds = events.Select(e => e.Id).ToList();
+            var tickets = await _context.Tickets.Where(t => eventIds.Contains(t.EventID)).ToListAsync();
+            var registration = await _context.Registrations.Where(r => eventIds.Contains(r.EventID)).ToListAsync();
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var dashboard = new Dashboard()
+            {
+                User = user,
+                Events = events,
+                Tickets = tickets,
+                Registrations = registration
+            };
+
+            return View(dashboard);
+        }
+        public async Task<IActionResult> AdminDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var users = await _context.Users.ToListAsync();
+            var events = await _context.Events.ToListAsync();
+            var tickets = await _context.Tickets.ToListAsync();
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var dashboard = new Dashboard()
+            {
+                User = user,
+                Users = users,
+                Events = events,
+                Tickets = tickets
+            };
+
+            return View(dashboard);
+        }
 
         public IActionResult Create()
         {
@@ -170,8 +221,19 @@ namespace EventManagement.Controllers
                     };
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-                    return RedirectToAction("Index", "Users", new { area = "", id = user.Id });
+                    if(userLogin.Role == "Admin")
+                    {
+                        return RedirectToAction("AdminDetails", "Users", new { area = "", id = user.Id });
+                    }else 
+                        if(userLogin.Role == "Organizer")
+                    {
+                        return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = user.Id });
+                    }else
+                        if(userLogin.Role == "User")
+                    {
+                        return RedirectToAction("Details", "Users", new { area = "", id = user.Id });
+                    }
+                    
                 }
                 else
                 {

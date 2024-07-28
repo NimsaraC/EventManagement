@@ -1,0 +1,125 @@
+﻿@model EventManagement.Models.Dashboard
+
+@{
+    ViewData["Title"] = "AdminDetails";
+}
+
+<h1>AdminDetails</h1>
+
+<div>
+    <div>
+        <h4>User</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.User.Name)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.User.Name)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.User.Email)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.User.Email)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.User.Password)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.User.Password)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.User.Role)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.User.Role)
+            </dd>
+        </dl>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model?.User.Id">Edit</a> |
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>
+<div>
+    <div>
+        <div class="container mt-3">
+            <h2>
+                Tickets
+            </h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>User Name</th>
+                        <th>User Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model?.Users ?? Enumerable.Empty<User>())
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Name</td>
+                            <td>@item.Role</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <div class="container mt-3">
+            <h2>
+                Events
+            </h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Event Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model?.Events ?? Enumerable.Empty<Event>())
+                    {
+                        <tr>
+                            <td>@item.EventName</td>
+                            <td>@item.EventType</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <div class="container mt-3">
+            <h2>
+                Tickets
+            </h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Event ID</th>
+                        <th>Ticket Type</th>
+                        <th>Ticket Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model?.Tickets ?? Enumerable.Empty<Ticket>())
+                    {
+                        <tr>
+                            <td>@item.EventID</td>
+                            <td>@item.Type</td>
+                            <td>@item.Price</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

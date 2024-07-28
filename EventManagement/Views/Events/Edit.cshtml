@@ -25,8 +25,19 @@
             </div>
             <div class="form-group">
                 <label asp-for="EventType" class="control-label"></label>
-                <input asp-for="EventType" class="form-control" />
-                <span asp-validation-for="EventType" class="text-danger"></span>
+                <select asp-for="EventType" class="form-select" aria-label="Default select example">
+                    <option selected>Select Event Type</option>
+                    <option value="Conferences">Conferences</option>
+                    <option value="Workshops">Workshops</option>
+                    <option value="Seminars">Seminars</option>
+                    <option value="Webinars">Webinars</option>
+                    <option value="Festivals">Festivals</option>
+                    <option value="Trade Shows">Trade Shows</option>
+                    <option value="Networking Events">Networking Events</option>
+                    <option value="Fundraisers">Fundraisers</option>
+                    <option value="Corporate Events">Corporate Events</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="DateTime" class="control-label"></label>
