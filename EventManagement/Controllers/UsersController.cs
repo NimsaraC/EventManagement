@@ -38,14 +38,29 @@ namespace EventManagement.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var events = await _context.Events.ToListAsync();
+            var eventIds = events.Select(e => e.Id).ToList();
+            var tickets = _context.Tickets.ToList();
+            var types = tickets.Select(t => t.Type).ToList();
+            var regis = await _context.Registrations.Where(r => r.UserID == id).ToListAsync();
+            var regisId = regis.Select(r => r.TicketID).ToList();
+            var rTickets = await _context.Tickets.Where(t => regisId.Contains(t.Id)).ToListAsync();
+
             if (user == null)
             {
                 return NotFound();
             }
-
-            return View(user);
+            var dashboard = new Dashboard()
+            {
+                User = user,
+                Events = events,
+                Tickets = tickets,
+                Tickets2 = rTickets,
+                Registrations = regis,
+                Registration = new Registration()
+            };
+            return View(dashboard);
         }
         public async Task<IActionResult> OrganizerDetails(int? id)
         {

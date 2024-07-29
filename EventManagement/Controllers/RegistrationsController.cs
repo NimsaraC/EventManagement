@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Database;
 using EventManagement.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace EventManagement.Controllers
 {
@@ -52,6 +55,7 @@ namespace EventManagement.Controllers
         // POST: Registrations/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,EventID,UserID,DateTime,TicketID")] Registration registration)
@@ -59,8 +63,24 @@ namespace EventManagement.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(registration);
+                var user = registration.UserID;
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                if(role == "Admin")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
+                }
+                else
+                    if(role == "Organizer")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
+                }
+                else
+                    if(role == "User")
+                {
+                    return RedirectToAction("Details", "Users", new { area = "", id = user });
+                }
+                //return RedirectToAction(nameof(Index));
             }
             return View(registration);
         }

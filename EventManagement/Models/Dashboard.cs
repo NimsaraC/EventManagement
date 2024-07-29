@@ -6,6 +6,7 @@
         public IEnumerable<User> Users { get; set; }
         public IEnumerable<Event> Events { get; set; }
         public IEnumerable<Ticket> Tickets { get; set; }
+        public IEnumerable<Ticket> Tickets2 { get; set; }
         public IEnumerable<Registration> Registrations { get; set; }
         public Event Event { get; set; }
         public Ticket Ticket { get; set; }

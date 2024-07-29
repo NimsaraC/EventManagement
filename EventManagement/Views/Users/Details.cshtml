@@ -1,7 +1,10 @@
-﻿@model EventManagement.Models.User
+﻿@using System.Security.Claims
+@model EventManagement.Models.Dashboard
 
 @{
     ViewData["Title"] = "Details";
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
 
 <h1>Details</h1>
@@ -10,33 +13,135 @@
     <h4>User</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User.Name)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Name)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User.Email)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Email)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Password)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User.Password)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Password)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Password)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User.Role)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Role)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.User.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
+</div>
+
+<div>
+    <h1>Events</h1>
+    <div>
+        @foreach (var item in Model?.Events ?? Enumerable.Empty<Event>())
+        {
+            <div class="container mt-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.EventName</h5>
+                        <h6 class="card-title">@item.EventType</h6>
+                        <p class="card-text">
+                            @item.EventDescription
+                        </p>
+                        <p>@item.DateTime</p>
+                        <div>
+                            <h6>
+                                Ticket Types
+                                @foreach (var ticket in Model?.Tickets.Where(t => t.EventID == item.Id) ?? Enumerable.Empty<Ticket>())
+                                {
+                                    <span class="d-inline badge bg-info">@ticket.Type</span>
+                                }
+                            </h6>
+                        </div>
+                        <br />
+                        <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal_@item.Id">Register</a>
+                    </div>
+                    <div class="card-footer text-body-secondary">Ongoing</div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal_@item.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@item.Id" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel_@item.Id">Register for event</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form asp-controller="Registrations" asp-action="Create">
+                            <div class="modal-body">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-group" hidden>
+                                    <label asp-for="Registration.EventID" class="control-label"></label>
+                                    <input asp-for="Registration.EventID" class="form-control" value="@item.Id" />
+                                    <span asp-validation-for="Registration.EventID" class="text-danger"></span>
+                                </div>
+                                <div class="form-group" hidden>
+                                    <label asp-for="Registration.UserID" class="control-label"></label>
+                                    <input asp-for="Registration.UserID" class="form-control" value="@userId" />
+                                    <span asp-validation-for="Registration.UserID" class="text-danger"></span>
+                                </div>
+                                <div class="form-group" hidden>
+                                    <label asp-for="Registration.DateTime" class="control-label"></label>
+                                    <input asp-for="Registration.DateTime" class="form-control" />
+                                    <span asp-validation-for="Registration.DateTime" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Select Ticket Type</h5>
+                                    @foreach (var ticket in Model?.Tickets.Where(t => t.EventID == item.Id) ?? Enumerable.Empty<Ticket>())
+                                    {
+                                        <div class="form-check">
+                                            <input asp-for="Registration.TicketID" type="radio" class="form-check-input" id="TicketId_@ticket.Id" name="Registration.TicketID" value="@ticket.Id">
+                                            <label for="TicketId_@ticket.Id" class="form-check-label badge bg-info">@ticket.Type</label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-primary" />
+                                </div>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div>
+    <h1>Registered Eevents</h1>
+    <div>
+        @{
+        }
+        @foreach (var item in Model?.Tickets2 ?? Enumerable.Empty<Ticket>())
+        {
+            var events = (Model?.Events.FirstOrDefault(e => e.Id == item.EventID));
+            <div class="container mt-3">
+                <div class="card text-center">
+                    <div class="card-header text-body-secondary"><h4>Event Name : @events.EventName</h4></div>
+                    <div class="card-body">
+                        <h6 class="card-title">Ticket ID : @item.Id</h6>
+                        <h6 class="card-title">Ticket Type : @item.Type</h6>
+                        <h6 class="card-title">Tickets : @item.Quantity</h6>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
 </div>
