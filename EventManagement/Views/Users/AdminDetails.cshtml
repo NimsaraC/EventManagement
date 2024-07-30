@@ -42,84 +42,150 @@
         <a asp-action="Index">Back to List</a>
     </div>
 </div>
-<div>
-    <div>
-        <div class="container mt-3">
-            <h2>
-                Tickets
-            </h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>User ID</th>
-                        <th>User Name</th>
-                        <th>User Role</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model?.Users ?? Enumerable.Empty<User>())
-                    {
-                        <tr>
-                            <td>@item.Id</td>
-                            <td>@item.Name</td>
-                            <td>@item.Role</td>
-                        </tr>
-                    }
 
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div>
-        <div class="container mt-3">
-            <h2>
-                Events
-            </h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Event Name</th>
-                        <th>Event Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model?.Events ?? Enumerable.Empty<Event>())
-                    {
-                        <tr>
-                            <td>@item.EventName</td>
-                            <td>@item.EventType</td>
-                        </tr>
-                    }
+<div class="container mt-3">
+    <h2>Users</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>User Role</th>
+                <th>Manage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model?.Users ?? Enumerable.Empty<User>())
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Role</td>
+                    <td>
+                        <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal_@item.Id">Edit</a>
+                        <a class="btn btn-outline-primary btn-block" >View</a>
+                    </td>
+                </tr>
 
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div>
-        <div class="container mt-3">
-            <h2>
-                Tickets
-            </h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Event ID</th>
-                        <th>Ticket Type</th>
-                        <th>Ticket Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model?.Tickets ?? Enumerable.Empty<Ticket>())
-                    {
-                        <tr>
-                            <td>@item.EventID</td>
-                            <td>@item.Type</td>
-                            <td>@item.Price</td>
-                        </tr>
-                    }
+                <div class="modal fade" id="exampleModal_@item.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@item.Id" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel_@item.Id">Manage User</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-footer">
+                                <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Edit User</a>
+                                <a class="btn btn-outline-warning" asp-action="Delete" asp-route-id="@item.Id">Delete User</a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </tbody>
+    </table>
+</div>
 
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="container mt-3">
+    <h2>Events</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Event Type</th>
+                <th>Manage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var iEvent in Model?.Events ?? Enumerable.Empty<Event>())
+            {
+                
+                <tr>
+                    <td>@iEvent.EventName</td>
+                    <td>@iEvent.EventType</td>
+                    <td>
+                        <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal2_@iEvent.Id">View</a>
+                    </td>
+                </tr>
+
+                <div class="modal fade" id="exampleModal2_@iEvent.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@iEvent.Id" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel_@iEvent.Id">@iEvent.EventName</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5>Event Name: @iEvent.EventName</h5>
+                                    </div>
+                                    <div class="col">
+                                        <h5>Event Type: @iEvent.EventType</h5>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h5>Description: </h5>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <p>@iEvent.EventDescription</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="row text-center">
+                                        <div class="col-12 bg-info bg-opacity-10 border border-info rounded align-bottom"><h5>Tickets</h5></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 "><h5>Ticket Types</h5></div>
+                                    </div>
+
+                                    @foreach (var ticket in Model?.Tickets.Where(t => t.EventID == iEvent.Id) ?? Enumerable.Empty<Ticket>())
+                                    {
+                                        <div class="row">
+                                            <div class="col">@ticket.Type</div>
+                                            <div class="col">Price $@ticket.Price</div>
+                                            <div class="col">Quantity @ticket.Quantity</div>
+                                        </div>
+                                    }
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <a class="btn btn-outline-primary" asp-controller="Events" asp-action="Edit" asp-route-id="@iEvent.Id">Edit Event</a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="container mt-3">
+    <h2>Tickets</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event ID</th>
+                <th>Ticket Type</th>
+                <th>Ticket Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model?.Tickets ?? Enumerable.Empty<Ticket>())
+            {
+                <tr>
+                    <td>@item.EventID</td>
+                    <td>@item.Type</td>
+                    <td>@item.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

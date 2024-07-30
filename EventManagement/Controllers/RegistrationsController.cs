@@ -52,35 +52,92 @@ namespace EventManagement.Controllers
             return View();
         }
 
-        // POST: Registrations/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EventID,UserID,DateTime,TicketID")] Registration registration)
+        public async Task<IActionResult> Create([Bind("Id,EventID,UserID,DateTime,TicketID,TicketQty,TicketPrice,Total")] Registration registration)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(registration);
+                var ticketP = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == registration.TicketID);
+                var existingRegistration = await _context.Registrations.FirstOrDefaultAsync(i => registration.TicketID == i.TicketID && registration.UserID == i.UserID);
+                var ticket = await _context.Tickets.FirstOrDefaultAsync(t => registration.TicketID == t.Id);
+
+                if(existingRegistration != null)
+                {
+                    existingRegistration.EventID = registration.EventID;
+                    existingRegistration.DateTime = registration.DateTime;
+                    existingRegistration.TicketQty = existingRegistration.TicketQty + registration.TicketQty;
+                    existingRegistration.TicketPrice = ticketP.Price;
+                    existingRegistration.Total = existingRegistration.Total + (ticketP.Price * registration.TicketQty);
+
+                    ticket.Quantity = ticket.Quantity - existingRegistration.TicketQty;
+
+                    if (ticket.Quantity == 0)
+                    {
+                        ViewBag.msg = "Sold Out";
+                    }
+                    else 
+                        if (ticket.Quantity < registration.TicketQty)
+                    {
+                        ViewBag.msg = "Tickets Not Available";
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _context.Tickets.Update(ticket);
+                            _context.Registrations.Update(existingRegistration);
+                            await _context.SaveChangesAsync();
+                        }
+                        catch
+                        {
+                            if (!RegistrationExists(existingRegistration.Id))
+                            {
+                                return NotFound();
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
+                    }
+
+                    
+                }
+                else
+                {
+                    var newRegistration = new Registration()
+                    {
+                        EventID = registration.EventID,
+                        UserID = registration.UserID,
+                        DateTime = registration.DateTime,
+                        TicketID = registration.TicketID,
+                        TicketQty = registration.TicketQty,
+                        TicketPrice = ticketP.Price,
+                        Total = ticketP.Price * registration.TicketQty
+                    };
+
+                    _context.Add(newRegistration);
+                    await _context.SaveChangesAsync();
+                }
                 var user = registration.UserID;
-                await _context.SaveChangesAsync();
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                if(role == "Admin")
+                if (role == "Admin")
                 {
                     return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
                 }
                 else
-                    if(role == "Organizer")
+                    if (role == "Organizer")
                 {
-                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
+                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = user });
                 }
                 else
-                    if(role == "User")
+                    if (role == "User")
                 {
                     return RedirectToAction("Details", "Users", new { area = "", id = user });
                 }
-                //return RedirectToAction(nameof(Index));
+                
             }
             return View(registration);
         }
@@ -106,7 +163,7 @@ namespace EventManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EventID,UserID,DateTime,TicketID")] Registration registration)
+        public async Task<IActionResult> Edit(int id, [Bind("EventID,UserID,DateTime,TicketID,TicketQty,TicketPrice,Total")] Registration registration)
         {
             if (id != registration.Id)
             {
@@ -131,7 +188,22 @@ namespace EventManagement.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (role == "Admin")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
+                }
+                else
+                    if (role == "Organizer")
+                {
+                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = user });
+                }
+                else
+                    if (role == "User")
+                {
+                    return RedirectToAction("Details", "Users", new { area = "", id = user });
+                }
             }
             return View(registration);
         }
@@ -172,6 +244,10 @@ namespace EventManagement.Controllers
         private bool RegistrationExists(int id)
         {
             return _context.Registrations.Any(e => e.Id == id);
+        }
+        private bool TicketExists(int id)
+        {
+            return _context.Registrations.Any(e => e.TicketID == id);
         }
     }
 }

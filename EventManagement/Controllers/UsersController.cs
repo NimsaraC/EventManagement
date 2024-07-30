@@ -108,7 +108,8 @@ namespace EventManagement.Controllers
                 User = user,
                 Users = users,
                 Events = events,
-                Tickets = tickets
+                Tickets = tickets,
+                NewUser = new User()
             };
 
             return View(dashboard);
@@ -121,7 +122,7 @@ namespace EventManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Email,Password,Role")] User user)
+        public async Task<IActionResult> Create(User user)
         {
             if (ModelState.IsValid)
             {
@@ -129,7 +130,50 @@ namespace EventManagement.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            /*if (ModelState.IsValid)
+            {
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+
+                if(existingUser != null)
+                {
+                    existingUser.Name = user.Name;
+                    existingUser.Email = user.Email;
+                    existingUser.Password = user.Password;
+                    existingUser.Role = user.Role;
+
+                    try
+                    {
+                        _context.Update(existingUser);
+                        await _context.SaveChangesAsync();
+                    }catch
+                    {
+                        if (!UserExists(existingUser.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+                else
+                {
+                    var newUser = new User()
+                    {
+                        Name = user.Name,
+                        Email = user.Email,
+                        Password = user.Password,
+                        Role = user.Role
+                    };
+
+                    _context.Add(newUser);
+                    await _context.SaveChangesAsync();
+                }
+                var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
+            }*/
+                return View(user);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -158,6 +202,15 @@ namespace EventManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                var users = await _context.Users.FindAsync(user.Id);
+                var newUser = new User()
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Password = user.Password,
+                    Role = user.Role,
+                };
                 try
                 {
                     _context.Update(user);
@@ -179,6 +232,7 @@ namespace EventManagement.Controllers
             return View(user);
         }
 
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

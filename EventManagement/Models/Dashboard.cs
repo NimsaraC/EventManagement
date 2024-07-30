@@ -3,6 +3,7 @@
     public class Dashboard
     {
         public User User { get; set; }
+        public User NewUser { get; set; }
         public IEnumerable<User> Users { get; set; }
         public IEnumerable<Event> Events { get; set; }
         public IEnumerable<Ticket> Tickets { get; set; }

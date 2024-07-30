@@ -30,7 +30,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Role" class="control-label"></label>
-                <input asp-for="Role" class="form-control" />
+                <select asp-for="Role" class="form-select" aria-label="Default select example">
+                    <option selected>Open this select Role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Organizer">Organizer</option>
+                    <option value="User">User</option>
+                </select>
                 <span asp-validation-for="Role" class="text-danger"></span>
             </div>
             <div class="form-group">

@@ -6,7 +6,15 @@
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
-
+@if (ViewBag.msg != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.msg
+    </div>
+    <div class="alert alert-warning">
+        @ViewBag.msg
+    </div>
+}
 <h1>Details</h1>
 
 <div>
@@ -72,6 +80,7 @@
                     </div>
                     <div class="card-footer text-body-secondary">Ongoing</div>
                 </div>
+                
             </div>
             <!-- Modal -->
             <div class="modal fade" id="exampleModal_@item.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@item.Id" aria-hidden="true">
@@ -81,6 +90,7 @@
                             <h1 class="modal-title fs-5" id="exampleModalLabel_@item.Id">Register for event</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+
                         <form asp-controller="Registrations" asp-action="Create">
                             <div class="modal-body">
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -106,8 +116,14 @@
                                         <div class="form-check">
                                             <input asp-for="Registration.TicketID" type="radio" class="form-check-input" id="TicketId_@ticket.Id" name="Registration.TicketID" value="@ticket.Id">
                                             <label for="TicketId_@ticket.Id" class="form-check-label badge bg-info">@ticket.Type</label>
+                                            <label class="form-check-label badge bg-info">Price : $@ticket.Price</label>
                                         </div>
                                     }
+                                </div>
+                                <div class="form-group">
+                                    <h5 class="control-label">Number Of Tickets</h5>
+                                    <input asp-for="Registration.TicketQty" class="form-control" />
+                                    <span asp-validation-for="Registration.TicketQty" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -124,20 +140,20 @@
     </div>
 </div>
 <div>
-    <h1>Registered Eevents</h1>
+    <h1>Registered Events</h1>
     <div>
-        @{
-        }
         @foreach (var item in Model?.Tickets2 ?? Enumerable.Empty<Ticket>())
         {
             var events = (Model?.Events.FirstOrDefault(e => e.Id == item.EventID));
+            var Register = (Model?.Registrations.FirstOrDefault(e => e.UserID.ToString() == userId));
             <div class="container mt-3">
                 <div class="card text-center">
                     <div class="card-header text-body-secondary"><h4>Event Name : @events.EventName</h4></div>
                     <div class="card-body">
                         <h6 class="card-title">Ticket ID : @item.Id</h6>
                         <h6 class="card-title">Ticket Type : @item.Type</h6>
-                        <h6 class="card-title">Tickets : @item.Quantity</h6>
+                        <h6 class="card-title">Ticket Price : $@Register.TicketPrice  Tickets : @Register.TicketQty</h6>
+                        <h6 class="card-title">Total : $@Register.Total</h6>
                     </div>
                 </div>
             </div>
