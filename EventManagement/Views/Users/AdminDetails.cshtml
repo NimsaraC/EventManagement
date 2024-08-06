@@ -7,39 +7,70 @@
 <h1>AdminDetails</h1>
 
 <div>
-    <div>
-        <h4>User</h4>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.User.Name)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.User.Name)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.User.Email)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.User.Email)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.User.Password)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.User.Password)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.User.Role)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.User.Role)
-            </dd>
-        </dl>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col"><h2>User Details</h2></div>
+                        <div class="col text-end">
+                            <a asp-action="Edit" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3_@Model?.User.Id">Edit Profile</a>
+                        </div>
+                    </div>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Name)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Name)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Email)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Email)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Password)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Password)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Role)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Role)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <a asp-action="Edit" asp-route-id="@Model?.User.Id">Edit</a> |
-        <a asp-action="Index">Back to List</a>
+    <div class="modal fade" id="exampleModal3_@Model?.User.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@Model?.User.Id" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel_@Model?.User.Id">Edit Profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="Edit" asp-route-id="@Model?.User.Id" method="post">
+                    <div class="modal-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="User.Id" value="@Model?.User.Id" />
+                        <div class="form-group">
+                            <label asp-for="User.Name" class="control-label"></label>
+                            <input asp-for="User.Name" class="form-control" value="@Model?.User.Name" />
+                            <span asp-validation-for="User.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="User.Email" class="control-label"></label>
+                            <input asp-for="User.Email" class="form-control" value="@Model?.User.Email" />
+                            <span asp-validation-for="User.Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="User.Password" class="control-label"></label>
+                            <input asp-for="User.Password" class="form-control" value="@Model?.User.Password" />
+                            <span asp-validation-for="User.Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="User.Role" class="control-label"></label>
+                            <input asp-for="User.Role" class="form-control" value="@Model?.User.Role" />
+                            <span asp-validation-for="User.Role" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -62,8 +93,13 @@
                     <td>@item.Name</td>
                     <td>@item.Role</td>
                     <td>
-                        <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal_@item.Id">Edit</a>
-                        <a class="btn btn-outline-primary btn-block" >View</a>
+                        
+                        @if(item.Role != "Admin")
+                        {
+                            <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal_@item.Id">Edit</a>
+                            <a class="btn btn-outline-danger btn-block" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        }
+                        
                     </td>
                 </tr>
 
@@ -71,14 +107,55 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel_@item.Id">Manage User</h1>
+                                <h1 class="modal-title fs-5" id="exampleModalLabel_@item.Id">Edit Profile</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-footer">
-                                <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id">Edit User</a>
-                                <a class="btn btn-outline-warning" asp-action="Delete" asp-route-id="@item.Id">Delete User</a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+                            <form asp-action="Edit" asp-route-id="@item.Id" method="post">
+                                <div class="modal-body">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" asp-for="User.Id" value="@item.Id" />
+                                    <div class="form-group">
+                                        <label asp-for="User.Name" class="control-label"></label>
+                                        <input asp-for="User.Name" class="form-control" value="@item.Name" />
+                                        <span asp-validation-for="User.Name" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="User.Email" class="control-label"></label>
+                                        <input asp-for="User.Email" class="form-control" value="@item.Email" />
+                                        <span asp-validation-for="User.Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="User.Password" class="control-label"></label>
+                                        <input asp-for="User.Password" class="form-control" value="@item.Password" />
+                                        <span asp-validation-for="User.Password" class="text-danger"></span>
+                                    </div>
+                                    @if (item.Role == "Organizer")
+                                    {
+                                        <div class="form-group" hidden>
+                                            <label asp-for="User.Role" class="control-label"></label>
+                                            <select asp-for="User.Role" class="form-select" aria-label="Default select example">
+                                                <option value="@item.Role" selected>@item.Role</option>
+                                                <option value="Organizer">Organizer</option>
+                                                <option value="User">User</option>
+                                            </select>
+                                            <span asp-validation-for="User.Role" class="text-danger"></span>
+                                        </div>
+                                    }
+                                    <div class="form-group">
+                                        <label asp-for="User.Role" class="control-label"></label>
+                                        <select asp-for="User.Role" class="form-select" aria-label="Default select example">
+                                            <option value="@item.Role" selected>@item.Role</option>
+                                            <option value="Organizer">Organizer</option>
+                                            <option value="User">User</option>
+                                        </select>
+                                        <span asp-validation-for="User.Role" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
