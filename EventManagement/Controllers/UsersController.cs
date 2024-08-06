@@ -130,49 +130,7 @@ namespace EventManagement.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            /*if (ModelState.IsValid)
-            {
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
-
-                if(existingUser != null)
-                {
-                    existingUser.Name = user.Name;
-                    existingUser.Email = user.Email;
-                    existingUser.Password = user.Password;
-                    existingUser.Role = user.Role;
-
-                    try
-                    {
-                        _context.Update(existingUser);
-                        await _context.SaveChangesAsync();
-                    }catch
-                    {
-                        if (!UserExists(existingUser.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    var newUser = new User()
-                    {
-                        Name = user.Name,
-                        Email = user.Email,
-                        Password = user.Password,
-                        Role = user.Role
-                    };
-
-                    _context.Add(newUser);
-                    await _context.SaveChangesAsync();
-                }
-                var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
-            }*/
+            
                 return View(user);
         }
 
@@ -202,7 +160,14 @@ namespace EventManagement.Controllers
 
             if (ModelState.IsValid)
             {
-                var users = await _context.Users.FindAsync(user.Id);
+                // Retrieve the existing user from the database
+                var existingUser = await _context.Users.FindAsync(user.Id);
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+
+                // Create a new user instance with the updated values
                 var newUser = new User()
                 {
                     Id = user.Id,
@@ -211,9 +176,64 @@ namespace EventManagement.Controllers
                     Password = user.Password,
                     Role = user.Role,
                 };
+
                 try
                 {
-                    _context.Update(user);
+                    // Update the existing user with new values
+                    existingUser.Name = newUser.Name;
+                    existingUser.Email = newUser.Email;
+                    existingUser.Password = newUser.Password;
+                    existingUser.Role = newUser.Role;
+
+                    // Save changes
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                if (role == "Admin")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
+                }
+                else
+                    if (role == "Organizer")
+                {
+                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = userid });
+                }
+                else
+                    if (role == "User")
+                {
+                    return RedirectToAction("Details", "Users", new { area = "", id = userid });
+                }
+            }
+            return View(user);
+        }
+
+        /*
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Password,Role")] User user)
+        {
+            if (id != user.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(user);  // Directly update the user object
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -230,9 +250,9 @@ namespace EventManagement.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
-        }
+        }*/
 
-        
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,12 +26,38 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="LogOut">LogOut</a>
-                        </li>
+                        @if(User.Identity.IsAuthenticated){
+                            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            
+                            if(role == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="AdminDetails">Profile</a>
+                                </li>
+                            }else 
+                            if(role == "Organizer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="OrganizerDetails">Profile</a>
+                                </li>
+                            }else
+                            if(role == "User")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="Details">Profile</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="LogOut">LogOut</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Login</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

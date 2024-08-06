@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Database;
 using EventManagement.Models;
+using System.Security.Claims;
 
 namespace EventManagement.Controllers
 {
@@ -44,8 +45,9 @@ namespace EventManagement.Controllers
         }
 
         // GET: Tickets/Create
-        public IActionResult Create()
+        public IActionResult Create(int? id)
         {
+            ViewBag.Id = id;
             return View();
         }
 
@@ -54,13 +56,53 @@ namespace EventManagement.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EventID,Type,Quantity,Price")] Ticket ticket)
+        public async Task<IActionResult> Create(int? id,[Bind("EventID,Type,Quantity,Price")] Ticket ticket)
         {
+            var ExistsTicket = await _context.Tickets.FirstOrDefaultAsync(t => t.EventID == ticket.EventID && t.Type == ticket.Type);
             if (ModelState.IsValid)
             {
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ExistsTicket != null)
+                {
+                    ExistsTicket.EventID = ticket.EventID;
+                    ExistsTicket.Price = ticket.Price;
+                    ExistsTicket.Quantity = ExistsTicket.Quantity + ticket.Quantity;
+                    ExistsTicket.Type = ticket.Type;
+
+                    try
+                    {
+                        _context.Tickets.Update(ExistsTicket);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!TicketExists(ticket.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+                else
+                {
+                    _context.Add(ticket);
+                    await _context.SaveChangesAsync();
+                }
+
+                var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                if (role == "Admin")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
+                }
+                else
+                    if (role == "Organizer")
+                {
+                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = user });
+                }
+
             }
             return View(ticket);
         }
@@ -95,6 +137,8 @@ namespace EventManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                
+
                 try
                 {
                     _context.Update(ticket);
@@ -152,6 +196,10 @@ namespace EventManagement.Controllers
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.Id == id);
+        }
+        private bool TicketTypeExists(int id,string Type)
+        {
+            return _context.Tickets.Any(e => e.EventID == id && e.Type == Type);
         }
     }
 }
