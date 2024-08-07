@@ -4,13 +4,12 @@
     ViewData["Title"] = "Login";
 }
 
-<h1>User Login</h1>
-
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card shadow p-3 mb-5 bg-body-tertiary rounded">
+            <div class="card-header text-center"><h4>Login Account</h4></div>
+            <form asp-action="Login">
             <div class="card-body">
-                <form asp-action="Login">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="form-group mb-3">
                         <label asp-for="Email" class="form-label"></label>
@@ -36,12 +35,9 @@
                             <label for="Role_User" class="form-check-label">User</label>
                         </div>
                     </div>
-                    <div class="form-group text-center">
-                        <input type="submit" value="Login" class="btn btn-primary btn-block" />
-                    </div>
-
-                </form>
             </div>
+                <div class="card-footer"><input type="submit" value="Login" class="btn btn-primary d-grid gap-2 col-6 mx-auto" /></div>
+            </form>
         </div>
     </div>
 </div>

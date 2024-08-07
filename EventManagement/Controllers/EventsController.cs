@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Database;
 using EventManagement.Models;
+using System.Security.Claims;
 
 namespace EventManagement.Controllers
 {
@@ -65,7 +66,6 @@ namespace EventManagement.Controllers
             return View(@event);
         }
 
-        // GET: Events/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,9 +81,6 @@ namespace EventManagement.Controllers
             return View(@event);
         }
 
-        // POST: Events/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,EventName,EventDescription,EventType,DateTime,OrganizerId,Location")] Event @event)
@@ -95,12 +92,34 @@ namespace EventManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                var existingEvent = await _context.Events.FindAsync(@event.Id);
+                if (existingEvent == null)
+                {
+                    return NotFound();
+                }
+
+                var newEvent = new Event()
+                {
+                    Id = @event.Id,
+                    EventName = @event.EventName,
+                    EventDescription = @event.EventDescription,
+                    EventType = @event.EventType,
+                    DateTime = @event.DateTime,
+                    OrganizerId = @event.OrganizerId,
+                    Location = @event.Location,
+                };
                 try
                 {
-                    _context.Update(@event);
+                    existingEvent.EventName = newEvent.EventName;
+                    existingEvent.EventDescription = newEvent.EventDescription;
+                    existingEvent.EventType = newEvent.EventType;
+                    existingEvent.DateTime = newEvent.DateTime;
+                    existingEvent.OrganizerId = newEvent.OrganizerId;
+                    existingEvent.Location = newEvent.Location;
+
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch(DbUpdateConcurrencyException)
                 {
                     if (!EventExists(@event.Id))
                     {
@@ -111,7 +130,22 @@ namespace EventManagement.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                if (role == "Admin")
+                {
+                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
+                }
+                else
+                    if (role == "Organizer")
+                {
+                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = userid });
+                }
+                else
+                    if (role == "User")
+                {
+                    return RedirectToAction("Details", "Users", new { area = "", id = userid });
+                }
             }
             return View(@event);
         }

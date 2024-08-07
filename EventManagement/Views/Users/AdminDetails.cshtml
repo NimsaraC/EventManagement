@@ -133,14 +133,11 @@
                                     {
                                         <div class="form-group" hidden>
                                             <label asp-for="User.Role" class="control-label"></label>
-                                            <select asp-for="User.Role" class="form-select" aria-label="Default select example">
-                                                <option value="@item.Role" selected>@item.Role</option>
-                                                <option value="Organizer">Organizer</option>
-                                                <option value="User">User</option>
-                                            </select>
+                                            <input asp-for="User.Role" class="form-control" value="@item.Role" />
                                             <span asp-validation-for="User.Role" class="text-danger"></span>
                                         </div>
-                                    }
+                                    }else
+                                    {
                                     <div class="form-group">
                                         <label asp-for="User.Role" class="control-label"></label>
                                         <select asp-for="User.Role" class="form-select" aria-label="Default select example">
@@ -150,6 +147,8 @@
                                         </select>
                                         <span asp-validation-for="User.Role" class="text-danger"></span>
                                     </div>
+                                    }
+                                    
                                 </div>
                                 <div class="modal-footer">
                                     <input type="submit" value="Save" class="btn btn-primary" />
@@ -183,8 +182,72 @@
                     <td>@iEvent.EventType</td>
                     <td>
                         <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal2_@iEvent.Id">View</a>
+                        <a class="btn btn-outline-primary btn-block" data-bs-toggle="modal" data-bs-target="#exampleModal4_@iEvent.Id">Edit</a>
                     </td>
                 </tr>
+
+                <div class="modal fade" id="exampleModal4_@iEvent.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@iEvent.Id" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel_@iEvent.Id">Edit Event</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form asp-controller="Events" asp-action="Edit" asp-route-id="@iEvent.Id" method="post">
+                                <div class="modal-body">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" asp-for="Event.Id" value="@iEvent.Id" />
+                                    <div class="form-group">
+                                        <label asp-for="Event.EventName" class="control-label"></label>
+                                        <input asp-for="Event.EventName" class="form-control" value="@iEvent.EventName" />
+                                        <span asp-validation-for="Event.EventName" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Event.EventDescription" class="control-label"></label>
+                                        <input asp-for="Event.EventDescription" class="form-control" value="@iEvent.EventDescription" />
+                                        <span asp-validation-for="Event.EventDescription" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Event.EventType" class="control-label"></label>
+                                        <select asp-for="Event.EventType" class="form-select" aria-label="Default select example">
+                                            <option value="@iEvent.EventType" selected>@iEvent.EventType</option>
+                                            <option value="Conferences">Conferences</option>
+                                            <option value="Workshops">Workshops</option>
+                                            <option value="Seminars">Seminars</option>
+                                            <option value="Webinars">Webinars</option>
+                                            <option value="Festivals">Festivals</option>
+                                            <option value="Trade Shows">Trade Shows</option>
+                                            <option value="Networking Events">Networking Events</option>
+                                            <option value="Fundraisers">Fundraisers</option>
+                                            <option value="Corporate Events">Corporate Events</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Event.DateTime" class="control-label"></label>
+                                        <input asp-for="Event.DateTime" class="form-control" type="datetime-local" value="@iEvent.DateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                                        <span asp-validation-for="Event.DateTime" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="Event.OrganizerId" class="control-label"></label>
+                                        <input asp-for="Event.OrganizerId" class="form-control" value="@iEvent.OrganizerId" />
+                                        <span asp-validation-for="Event.OrganizerId" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Event.Location" class="control-label"></label>
+                                        <input asp-for="Event.Location" class="form-control" value="@iEvent.Location" />
+                                        <span asp-validation-for="Event.Location" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="modal fade" id="exampleModal2_@iEvent.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@iEvent.Id" aria-hidden="true">
                     <div class="modal-dialog">
@@ -221,13 +284,13 @@
                                     </div>
 
                                     @foreach (var ticket in Model?.Tickets.Where(t => t.EventID == iEvent.Id) ?? Enumerable.Empty<Ticket>())
-                                    {
+                                        {
                                         <div class="row">
                                             <div class="col">@ticket.Type</div>
                                             <div class="col">Price $@ticket.Price</div>
                                             <div class="col">Quantity @ticket.Quantity</div>
                                         </div>
-                                    }
+                                        }
                                 </div>
 
                             </div>
@@ -265,4 +328,58 @@
             }
         </tbody>
     </table>
+</div>
+
+<div class="modal fade" id="exampleModal2_iEvent.Id" tabindex="-1" aria-labelledby="exampleModalLabel_iEvent.Id" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel_iEvent.Id">iEvent.EventName</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h5>Event Name: iEvent.EventName</h5>
+                    </div>
+                    <div class="col">
+                        <h5>Event Type: iEvent.EventType</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h5>Description: </h5>
+                    </div>
+                    <div class="col-sm-9">
+                        <p>iEvent.EventDescription</p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="row text-center">
+                        <div class="col-12 bg-info bg-opacity-10 border border-info rounded align-bottom"><h5>Tickets</h5></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 "><h5>Ticket Types</h5></div>
+                    </div>
+
+                    foreach (var ticket in Model?.Tickets.Where(t => t.EventID == iEvent.Id) ?? Enumerable.Empty<Ticket>())
+                    {
+                        <div class="row">
+                            <div class="col">ticket.Type</div>
+                            <div class="col">Price $ticket.Price</div>
+                            <div class="col">Quantity ticket.Quantity</div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <a class="btn btn-outline-primary" asp-controller="Events" asp-action="Edit" asp-route-id="iEvent.Id">Edit Event</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,8 +1,88 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Event Management System - Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4">Welcome to Event Management System</h1>
+            <p class="lead">Your one-stop solution for managing events, registering attendees, handling ticket sales, and generating event-related reports.</p>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (role == "Admin")
+                {
+                    <a class="btn btn-primary btn-lg" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="AdminDetails">Profile</a>
+                }
+                else if (role == "Organizer")
+                {
+                    <a class="btn btn-primary btn-lg" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="OrganizerDetails">Profile</a>
+                }
+                else if (role == "User")
+                {
+                    <a class="btn btn-primary btn-lg" asp-area="" asp-route-id="@userId" asp-controller="Users" asp-action="Details">Profile</a>
+                }
+            }
+            else
+            {
+                <a class="btn btn-primary btn-lg" asp-controller="Users" asp-action="Login">Login</a>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3>User Management</h3>
+                <p>Register, login, and manage your profile with ease. Role-based access control ensures everyone has the right permissions.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Event Management</h3>
+                <p>Create, edit, and delete events. Categorize events, manage registrations, and send confirmation emails effortlessly.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h3>Ticket Management</h3>
+                <p>Create and manage different ticket types, handle sales, and send e-tickets to attendees.</p>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Event Scheduling</h3>
+                <p>View events on a calendar, send reminders, and integrate with personal calendars like Google and Outlook.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Analytics and Reporting</h3>
+                <p>Track attendance, generate sales reports, and analyze feedback to improve future events.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>Communication Tools</h3>
+                <p>Send email notifications, facilitate communication between organizers and attendees, and integrate with social media.</p>
+            </div>
+        </div>
+    </div>
 </div>

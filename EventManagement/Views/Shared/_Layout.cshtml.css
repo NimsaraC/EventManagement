@@ -1,48 +1,62 @@
-﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
-
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+﻿/* Navbar Styling */
+.navbar {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    transition: background-color 0.3s ease;
 }
 
-a {
-  color: #0077cc;
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+    transition: color 0.3s ease;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    .navbar-brand:hover {
+        color: #0056b3;
+    }
+
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+    color: #343a40;
+    transition: color 0.3s ease;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    .navbar-nav .nav-link.active {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: #0056b3;
+    }
+
+    .navbar-nav .nav-link.text-danger {
+        color: #dc3545;
+    }
+
+        .navbar-nav .nav-link.text-danger:hover {
+            color: #c82333;
+        }
+
+.navbar-toggler {
+    border-color: #007bff;
 }
 
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'><path stroke='rgba(0, 123, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/></svg>");
 }
 
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+.navbar-collapse {
+    justify-content: flex-end;
 }
 
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+/* Hover effect on Navbar */
+.navbar:hover {
+    background-color: #e9ecef;
 }
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+.navbar-collapse.collapse.show {
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

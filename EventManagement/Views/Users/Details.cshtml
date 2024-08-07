@@ -6,6 +6,7 @@
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
+
 @if (ViewBag.msg != null)
 {
     <div class="alert alert-danger" role="alert">
@@ -15,41 +16,74 @@
         @ViewBag.msg
     </div>
 }
-<h1>Details</h1>
 
 <div>
-    <h4>User</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Password)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Password)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Role)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Role)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.User.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col"><h2>User Details</h2></div>
+                        <div class="col text-end">
+                            <a asp-action="Edit" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3_@Model?.User.Id">Edit Profile</a>
+                        </div>
+                    </div>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Name)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Name)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Email)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Email)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Password)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Password)</dd>
+                        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User.Role)</dt>
+                        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Role)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModal3_@Model?.User.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@Model?.User.Id" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel_@Model?.User.Id">Edit Profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="Edit" asp-route-id="@Model?.User.Id" method="post">
+                    <div class="modal-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="User.Id" value="@Model?.User.Id" />
+                        <div class="form-group">
+                            <label asp-for="User.Name" class="control-label"></label>
+                            <input asp-for="User.Name" class="form-control" value="@Model?.User.Name" />
+                            <span asp-validation-for="User.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="User.Email" class="control-label"></label>
+                            <input asp-for="User.Email" class="form-control" value="@Model?.User.Email" />
+                            <span asp-validation-for="User.Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="User.Password" class="control-label"></label>
+                            <input asp-for="User.Password" class="form-control" value="@Model?.User.Password" />
+                            <span asp-validation-for="User.Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="User.Role" class="control-label"></label>
+                            <input asp-for="User.Role" class="form-control" value="@Model?.User.Role" />
+                            <span asp-validation-for="User.Role" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div>
@@ -57,6 +91,8 @@
     <div>
         @foreach (var item in Model?.Events ?? Enumerable.Empty<Event>())
         {
+            var regId = Model?.Registrations.FirstOrDefault(r => r.EventID == item.Id && r.UserID.ToString() == userId);
+
             <div class="container mt-3">
                 <div class="card text-center">
                     <div class="card-body">
@@ -80,7 +116,7 @@
                     </div>
                     <div class="card-footer text-body-secondary">Ongoing</div>
                 </div>
-                
+
             </div>
             <!-- Modal -->
             <div class="modal fade" id="exampleModal_@item.Id" tabindex="-1" aria-labelledby="exampleModalLabel_@item.Id" aria-hidden="true">
@@ -94,6 +130,7 @@
                         <form asp-controller="Registrations" asp-action="Create">
                             <div class="modal-body">
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <input hidden asp-for="Registration.Id" class="form-control" value="@regId?.Id" />
                                 <div class="form-group" hidden>
                                     <label asp-for="Registration.EventID" class="control-label"></label>
                                     <input asp-for="Registration.EventID" class="form-control" value="@item.Id" />
@@ -117,18 +154,32 @@
                                             <input asp-for="Registration.TicketID" type="radio" class="form-check-input" id="TicketId_@ticket.Id" name="Registration.TicketID" value="@ticket.Id">
                                             <label for="TicketId_@ticket.Id" class="form-check-label badge bg-info">@ticket.Type</label>
                                             <label class="form-check-label badge bg-info">Price : $@ticket.Price</label>
+                                            @if (@ticket.Quantity == 0)
+                                            {
+                                                <label class="form-check-label badge bg-danger">Sold Out</label>
+                                            }
+                                            else if (@ticket.Quantity < 10)
+                                            {
+                                                <label class="form-check-label badge bg-warning">Available : @ticket.Quantity</label>
+                                            }else
+                                            {
+                                                <label class="form-check-label badge bg-info">Available : @ticket.Quantity</label>
+                                            }
+                                            <input hidden asp-for="Registration.TicketPrice" class="form-check-input" id="TicketId_@ticket.Id" value="@ticket.Price">
                                         </div>
+                                        ViewBag.Qty = ticket.Quantity;
+                                       
                                     }
                                 </div>
                                 <div class="form-group">
                                     <h5 class="control-label">Number Of Tickets</h5>
-                                    <input asp-for="Registration.TicketQty" class="form-control" />
+                                    <input id="11" asp-for="Registration.TicketQty" class="form-control" />
                                     <span asp-validation-for="Registration.TicketQty" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <div class="form-group">
-                                    <input type="submit" value="Create" class="btn btn-primary" />
+                                        <input type="submit" value="Create" class="btn btn-primary" />
                                 </div>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
@@ -136,28 +187,35 @@
                     </div>
                 </div>
             </div>
-        }
-    </div>
-</div>
-<div>
-    <h1>Registered Events</h1>
-    <div>
-        @foreach (var item in Model?.Tickets2 ?? Enumerable.Empty<Ticket>())
-        {
-            var events = (Model?.Events.FirstOrDefault(e => e.Id == item.EventID));
-            var Register = (Model?.Registrations.FirstOrDefault(e => e.UserID.ToString() == userId));
-            <div class="container mt-3">
-                <div class="card text-center">
-                    <div class="card-header text-body-secondary"><h4>Event Name : @events.EventName</h4></div>
-                    <div class="card-body">
-                        <h6 class="card-title">Ticket ID : @item.Id</h6>
-                        <h6 class="card-title">Ticket Type : @item.Type</h6>
-                        <h6 class="card-title">Ticket Price : $@Register.TicketPrice  Tickets : @Register.TicketQty</h6>
-                        <h6 class="card-title">Total : $@Register.Total</h6>
-                    </div>
-                </div>
-            </div>
+            ViewBag.id = regId;
         }
     </div>
 
-</div>
+    <div>
+        @if (ViewBag.id != null)
+        {
+            <h1>Registered Events</h1>
+            <div>
+                @foreach (var item in Model?.Registrations.Where(i => i.UserID.ToString() == userId) ?? Enumerable.Empty<Registration>())
+                {
+
+                    var events = Model?.Events.FirstOrDefault(e => e.Id == item.EventID);
+                    var ticket = Model?.Tickets.FirstOrDefault(t => t.Id == item.TicketID);
+                    <div class="container mt-3">
+                        <div class="card text-center">
+                            <div class="card-header text-body-secondary"><h4>Event Name : @events?.EventName</h4></div>
+                            <div class="card-body">
+                                <h6 class="card-title">Ticket ID : @ticket?.Id</h6>
+                                <h6 class="card-title">Ticket Type : @ticket?.Type</h6>
+                                <h6 class="card-title">Ticket Price : $@ticket?.Price  Tickets : @item.TicketQty</h6>
+                                <h6 class="card-title">Total : $@item?.Total</h6>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        
+    </div>
+

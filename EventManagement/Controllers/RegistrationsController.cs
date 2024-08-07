@@ -51,48 +51,73 @@ namespace EventManagement.Controllers
         {
             return View();
         }
+      
 
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EventID,UserID,DateTime,TicketID,TicketQty,TicketPrice,Total")] Registration registration)
+        public async Task<IActionResult> Create([Bind("EventID,UserID,DateTime,TicketID,TicketQty,TicketPrice,Total")] Registration registration)
         {
+            var userid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
             if (ModelState.IsValid)
             {
-                var ticketP = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == registration.TicketID);
-                var existingRegistration = await _context.Registrations.FirstOrDefaultAsync(i => registration.TicketID == i.TicketID && registration.UserID == i.UserID);
-                var ticket = await _context.Tickets.FirstOrDefaultAsync(t => registration.TicketID == t.Id);
+                var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == registration.TicketID);
+                var existRegistration = await _context.Registrations.FirstOrDefaultAsync(r => r.UserID == registration.UserID && r.TicketID == registration.TicketID);
 
-                if(existingRegistration != null)
+                
+
+                if (ticket.Quantity < registration.TicketQty)
                 {
-                    existingRegistration.EventID = registration.EventID;
-                    existingRegistration.DateTime = registration.DateTime;
-                    existingRegistration.TicketQty = existingRegistration.TicketQty + registration.TicketQty;
-                    existingRegistration.TicketPrice = ticketP.Price;
-                    existingRegistration.Total = existingRegistration.Total + (ticketP.Price * registration.TicketQty);
+                    ViewBag.ErrorMessage = "Registration Fail";
+                }
+                else
+                {
+                    if (existRegistration != null)
+                    {
+                        var newTicket = new Ticket()
+                        {
+                            Id = ticket.Id,
+                            EventID = ticket.EventID,
+                            Type = ticket.Type,
+                            Quantity = ticket.Quantity - registration.TicketQty,
+                            Price = ticket.Price,
+                        };
 
-                    ticket.Quantity = ticket.Quantity - existingRegistration.TicketQty;
+                        var newRegistration = new Registration()
+                        {
+                            Id = registration.Id,
+                            EventID = registration.EventID,
+                            UserID = registration.UserID,
+                            DateTime = registration.DateTime,
+                            TicketID = registration.TicketID,
+                            TicketQty = existRegistration.TicketQty + registration.TicketQty,
+                            TicketPrice = registration.TicketPrice,
+                            Total = existRegistration.Total + (registration.TicketQty * registration.TicketPrice)
+                        };
 
-                    if (ticket.Quantity == 0)
-                    {
-                        ViewBag.msg = "Sold Out";
-                    }
-                    else 
-                        if (ticket.Quantity < registration.TicketQty)
-                    {
-                        ViewBag.msg = "Tickets Not Available";
-                    }
-                    else
-                    {
+
                         try
                         {
-                            _context.Tickets.Update(ticket);
-                            _context.Registrations.Update(existingRegistration);
+                            existRegistration.EventID = newRegistration.EventID;
+                            existRegistration.UserID = newRegistration.UserID;
+                            existRegistration.DateTime = newRegistration.DateTime;
+                            existRegistration.TicketID = newRegistration.TicketID;
+                            existRegistration.TicketQty = newRegistration.TicketQty;
+                            existRegistration.TicketPrice = newRegistration.TicketPrice;
+                            existRegistration.Total = newRegistration.Total;
+
+                            ticket.EventID = newTicket.EventID;
+                            ticket.Type = newTicket.Type;
+                            ticket.Quantity = newTicket.Quantity;
+                            ticket.Price = newTicket.Price;
+
                             await _context.SaveChangesAsync();
                         }
-                        catch
+                        catch (DbUpdateConcurrencyException)
                         {
-                            if (!RegistrationExists(existingRegistration.Id))
+                            if (!RegistrationExists(registration.Id))
                             {
                                 return NotFound();
                             }
@@ -102,44 +127,70 @@ namespace EventManagement.Controllers
                             }
                         }
                     }
+                    else
+                    {
+                        var newRegistration2 = new Registration()
+                        {
+                            EventID = registration.EventID,
+                            UserID = registration.UserID,
+                            DateTime = registration.DateTime,
+                            TicketID = registration.TicketID,
+                            TicketQty = registration.TicketQty,
+                            TicketPrice = registration.TicketPrice,
+                            Total = (registration.TicketQty * registration.TicketPrice)
+                        };
+
+                        var newTicket = new Ticket()
+                        {
+                            Id = ticket.Id,
+                            EventID = ticket.EventID,
+                            Type = ticket.Type,
+                            Quantity = ticket.Quantity - registration.TicketQty,
+                            Price = ticket.Price,
+                        };
+
+                        ticket.EventID = newTicket.EventID;
+                        ticket.Type = newTicket.Type;
+                        ticket.Quantity = newTicket.Quantity;
+                        ticket.Price = newTicket.Price;
+
+                        _context.Registrations.Add(newRegistration2);
+                        await _context.SaveChangesAsync();
+
+                        if (role == "Admin")
+                        {
+                            return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
+                        }
+                        else
+                            if (role == "Organizer")
+                        {
+                            return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = userid });
+                        }
+                        else
+                            if (role == "User")
+                        {
+                            return RedirectToAction("Details", "Users", new { area = "", id = userid });
+                        }
+                    }
 
                     
                 }
-                else
-                {
-                    var newRegistration = new Registration()
-                    {
-                        EventID = registration.EventID,
-                        UserID = registration.UserID,
-                        DateTime = registration.DateTime,
-                        TicketID = registration.TicketID,
-                        TicketQty = registration.TicketQty,
-                        TicketPrice = ticketP.Price,
-                        Total = ticketP.Price * registration.TicketQty
-                    };
 
-                    _context.Add(newRegistration);
-                    await _context.SaveChangesAsync();
-                }
-                var user = registration.UserID;
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                if (role == "Admin")
-                {
-                    return RedirectToAction("AdminDetails", "Users", new { area = "", id = user });
-                }
-                else
-                    if (role == "Organizer")
-                {
-                    return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = user });
-                }
-                else
-                    if (role == "User")
-                {
-                    return RedirectToAction("Details", "Users", new { area = "", id = user });
-                }
                 
+
             }
-            return View(registration);
+            
+            if (role == "Admin")
+            {
+                return RedirectToAction("AdminDetails", "Users", new { area = "", id = userid });
+            }
+            else
+                if (role == "Organizer")
+            {
+                return RedirectToAction("OrganizerDetails", "Users", new { area = "", id = userid });
+            }
+            else
+                return RedirectToAction("Details", "Users", new { area = "", id = userid });
         }
 
         // GET: Registrations/Edit/5
@@ -244,6 +295,10 @@ namespace EventManagement.Controllers
         private bool RegistrationExists(int id)
         {
             return _context.Registrations.Any(e => e.Id == id);
+        }
+        private bool ExistsRegistration(int id, int uid)
+        {
+            return _context.Registrations.Any(e => e.TicketID == id && e.UserID == uid);
         }
         private bool TicketExists(int id)
         {

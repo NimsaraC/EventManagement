@@ -1,52 +1,57 @@
-﻿@model EventManagement.Models.User
+﻿@using System.Security.Claims
+@model EventManagement.Models.User
 
 @{
     ViewData["Title"] = "Create";
+    var role = User.FindFirst(ClaimTypes.Role)?.Value;
 }
 
-<h1>Create</h1>
 
-<h4>User</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow p-3 mb-5 bg-body-tertiary rounded">
+            <div class="card-header text-center"><h4>Create Account</h4></div>
+            <form asp-action="Create">
+            <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Role" class="control-label"></label>
+                        <select asp-for="Role" class="form-select" aria-label="Default select example">
+                            <option selected>Open this select Role</option>
+                            @if (role == "Admin")
+                            {
+                                <option value="Admin">Admin</option>
+                                <option value="Organizer">Organizer</option>
+                                <option value="User">User</option>
+                            }
+                            else
+                            {
+                                <option value="Organizer">Organizer</option>
+                                <option value="User">User</option>
+                            }
+                        </select>
+                    </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
-                <select asp-for="Role" class="form-select" aria-label="Default select example">
-                    <option selected>Open this select Role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Organizer">Organizer</option>
-                    <option value="User">User</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+            <div class="card-footer"><input type="submit" value="Create" class="btn btn-primary d-grid gap-2 col-6 mx-auto" /></div>
+            </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
